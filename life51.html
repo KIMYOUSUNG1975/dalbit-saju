@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>달빛천사의운명노트</title>
+  <style>
+    body { font-family: 'Segoe UI', sans-serif; line-height: 1.8; padding: 20px; }
+    h1 { font-size: 2em; }
+    label { font-weight: bold; margin-right: 10px; }
+    input, select { margin: 5px 0 15px 0; padding: 5px; font-size: 1em; }
+    .section-title {
+      font-size: 1.2em;
+      margin-top: 20px;
+      padding-bottom: 5px;
+      border-bottom: 2px solid #ccc;
+      color: #5a2a83;
+    }
+    .emoji { font-size: 1.5em; margin-right: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🌙 달빛천사의운명노트</h1>
+
+  <label for="birthdate">생년월일</label>
+  <select id="year" style="font-size:1em; padding:5px;"></select>
+<select id="month" style="font-size:1em; padding:5px;"></select>
+<select id="day" style="font-size:1em; padding:5px;"></select>
+  <br>
+
+  <label for="birthtime">태어난 시간</label>
+  <input type="text" id="birthtime" placeholder="예: 오전 2시">
+  <br>
+
+  <label for="gender">성별</label>
+  $1
+  <p id="ageDisplay" style="font-weight:bold; margin-top:10px;">현재 나이: -세</p>
+
+  <button onclick="showResult()">🔮 사주풀이 보기</button>
+
+  <div id="result" style="margin-top: 30px;"></div>
+
+  <script>
+    const hexagrams = [
+  "乾(건): 창조와 시작 - 하늘의 기운으로 시작과 창조, 강한 추진력과 자립심이 필요한 시기입니다.",
+  "坤(곤): 수용과 포용 - 땅의 기운으로 모든 것을 받아들이며 기다림과 인내가 복을 부릅니다.",
+  "屯(둔): 어려움 속의 가능성 - 시작은 힘들지만 시간이 지남에 따라 성장할 수 있습니다.",
+  "蒙(몽): 배움과 성숙 - 배우는 자세로 임하면 깨달음과 성숙을 얻게 됩니다.",
+  "需(수): 기다림과 인내 - 지금은 때를 기다려야 하며, 준비가 중요합니다.",
+  "訟(송): 갈등과 조율 - 분쟁을 피하고 조화롭게 문제를 해결하는 지혜가 필요합니다.",
+  "師(사): 조직과 리더십 - 질서와 전략이 필요하며, 리더십을 발휘할 기회가 옵니다.",
+  "比(비): 협력과 유대 - 사람들과 힘을 모아야 하며 신뢰가 중요합니다.",
+  "小畜(소축): 자제와 축적 - 무리하지 말고 차근차근 쌓아가는 것이 이롭습니다.",
+  "履(이): 신중한 진행 - 조심스럽게 계획을 실천하면 좋은 결과를 얻습니다.",
+  "泰(태): 순조로움 - 모든 것이 잘 풀리는 운세, 기회를 놓치지 말아야 합니다.",
+  "否(비): 막힘과 변화 - 현재는 막혔지만 전환의 계기를 만들 수 있습니다.",
+  "同人(동인): 조화로운 관계 - 사람들과의 화합을 통해 목표를 이룰 수 있습니다.",
+  "大有(대유): 큰 성공 - 물질적, 정신적으로 풍요로운 시기가 될 수 있습니다.",
+  "謙(겸): 겸손의 미덕 - 겸손할수록 복이 따르며, 자만은 금물입니다.",
+  "豫(예): 기쁨과 여유 - 즐거움이 넘치는 시기, 타인과의 나눔도 좋습니다.",
+  "隨(수): 순응과 조화 - 흐름에 따르는 것이 유리하며 융통성이 필요합니다.",
+  "蠱(고): 개혁과 치유 - 고질적인 문제를 고치고 새롭게 도약할 수 있는 기회입니다.",
+  "臨(림): 관찰과 지도 - 현명한 지도자와 조언자를 만나게 될 수 있습니다.",
+  "觀(관): 통찰력 - 멀리 보고 전체를 파악해야 성공할 수 있습니다.",
+  "噬嗑(서합): 문제 해결 - 복잡한 문제를 해결할 수 있는 지혜가 생깁니다.",
+  "贲(비): 장식과 아름다움 - 외형보다 내실을 다져야 할 시기입니다.",
+  "剥(박): 해체와 새로운 출발 - 기존 것을 내려놓고 새롭게 시작해야 할 운입니다.",
+  "复(복): 돌아옴 - 과거의 것을 회복하거나 다시 만날 기회가 있습니다.",
+  "无妄(무망): 순수함과 진실성 - 진실된 마음으로 행동하면 좋은 결과를 얻습니다.",
+  "大畜(대축): 큰 저축과 성장 - 인내하며 실력을 길러야 할 때입니다.",
+  "颐(이): 양육과 지혜 - 자신을 잘 관리하고 양육하는 것이 복이 됩니다.",
+  "大过(대과): 과한 부담 - 무리하지 말고 휴식을 취하는 것이 좋습니다.",
+  "坎(감): 위기와 극복 - 시련 속에 기회가 있으며 용기가 필요한 시기입니다.",
+  "离(리): 빛과 지혜 - 명확한 판단과 지혜로 앞을 밝혀야 합니다.",
+  "咸(함): 감응과 조화 - 마음이 통하고 사람과의 인연이 깊어지는 운입니다.",
+  "恒(항): 지속과 안정 - 꾸준함이 중요하며 장기적으로 성과가 나타납니다.",
+  "遯(둔): 물러남의 미덕 - 지금은 나아가기보다 물러서는 것이 유리합니다.",
+  "大壮(대장): 큰 힘의 표현 - 자신의 힘을 과시할 수 있는 시기이나 겸손이 필요합니다.",
+  "晋(진): 발전과 진출 - 상승기운이 강하며 새로운 영역에 도전할 수 있습니다.",
+  "明夷(명이): 어둠 속 진리 - 어려운 시기에 중심을 잡고 내면을 밝히세요.",
+  "家人(가인): 가족과 질서 - 가정과 공동체에서 조화가 중요한 시기입니다.",
+  "睽(규): 차이와 충돌 - 다름을 인정하고 소통하려는 노력이 필요합니다.",
+  "蹇(건): 장애와 인내 - 당장의 어려움을 참고 미래를 준비하세요.",
+  "解(해): 해방과 해결 - 얽힌 문제에서 벗어나 자유로워질 수 있습니다.",
+  "损(손): 희생과 이익 - 나눔과 베풂을 통해 더 큰 복이 들어옵니다.",
+  "益(익): 더함과 이득 - 행운이 따르며 기회를 놓치지 마세요.",
+  "夬(쾌): 단호한 결정 - 결단력이 필요한 시기입니다. 망설이지 마세요.",
+  "姤(구): 우연한 만남 - 인연이나 기회가 우연히 다가올 수 있습니다.",
+  "萃(췌): 모임과 집중 - 협업과 네트워킹으로 성과를 얻을 수 있습니다.",
+  "升(승): 승진과 발전 - 상승 운세로 큰 변화와 성취가 따릅니다.",
+  "困(곤): 고난의 지혜 - 인내를 통해 한층 더 성장할 수 있습니다.",
+  "井(정): 근본과 자양 - 뿌리를 다지고 기초를 다질 시기입니다.",
+  "革(혁): 개혁과 변화 - 변화를 두려워 말고 새롭게 도전하세요.",
+  "鼎(정): 성취와 조화 - 실력 발휘로 인정을 받고 성과를 이룰 운입니다.",
+  "震(진): 움직임과 새 출발 - 정체되었던 흐름이 움직이기 시작합니다.",
+  "艮(간): 멈춤과 고요 - 멈춤 속에서 내면을 다지는 시기입니다.",
+  "渐(점): 점진적인 변화 - 급하지 않게, 꾸준한 진전이 중요합니다.",
+  "归妹(귀매): 인연과 결합 - 새로운 관계나 인연이 맺어질 수 있습니다.",
+  "丰(풍): 풍요와 명예 - 성취와 인정, 사회적 명예가 따릅니다.",
+  "旅(려): 이동과 학습 - 여행, 이직, 학습에 유리한 운입니다.",
+  "巽(손): 침투와 유연함 - 부드러움으로 변화에 잘 적응할 수 있습니다.",
+  "兑(태): 기쁨과 만족 - 기쁨과 좋은 결과가 따르며 대인관계가 원만합니다.",
+  "涣(환): 흩어짐과 재결합 - 흩어진 것을 다시 모을 기회가 생깁니다.",
+  "节(절): 절제와 균형 - 자제력과 균형감이 복을 부릅니다.",
+  "中孚(중부): 진실과 신뢰 - 진심을 다하면 신뢰를 얻게 됩니다.",
+  "小过(소과): 신중함 - 작은 실수도 주의해야 하며 신중함이 필요합니다.",
+  "既济(기제): 완성과 유지 - 목표를 달성하고 그 상태를 잘 유지하는 시기입니다.",
+  "未济(미제): 미완과 가능성 - 아직 끝나지 않았으며 더 나은 결과를 위해 노력해야 합니다."
+];
+
+    function getElementByDay(birthdate) {
+      const date = new Date(birthdate);
+      const day = date.getDate();
+      const elements = ["목(木)", "화(火)", "토(土)", "금(金)", "수(水)"];
+      return elements[day % 5];
+    }
+
+    function getHexagram(birthdate) {
+      const date = new Date(birthdate);
+      const index = (date.getMonth() * 31 + date.getDate()) % 64;
+      return hexagrams[index];
+    }
+
+    function showResult() {
+      const age = calculateAge(true);
+      const year = document.getElementById("year").value;
+      const month = document.getElementById("month").value;
+      const day = document.getElementById("day").value;
+      const birthdate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+      const element = getElementByDay(birthdate);
+      const hexagram = getHexagram(birthdate);
+      let resultHTML = `
+        <div class="section-title">🧿 오늘의 기운</div>
+<p>이번에 떠오른 괘는 <strong>${hexagram.split(":")[0]}</strong>야. ${hexagram.split(" - ")[1] || ''} 그러니까 너무 조급해하지 말고, 흐름을 믿고 한 걸음씩 가보자.</p>
+$1
+<p><strong>추천 행동:</strong> 긍정적인 마음으로 자신의 운을 받아들이고 실천하세요.</p>
+<p><strong>피해야 할 행동:</strong> 조급함이나 고집으로 흐름을 거스르지 마세요.</p>
+      `;
+
+      if (element === "목(木)") {
+        resultHTML += `
+          <div class="section-title">💰 재물운</div>
+<p>재물운이 조금씩 따라오고 있어. 무리하지 말고 차분하게 준비하면 기회가 와.</p>
+
+          <div class="section-title">⚠️ 조심할 점</div>
+<p>지금은 감정 앞세우기보다 한 번 더 생각하고 행동하는 게 좋아.</p>
+
+          <div class="section-title">✅ 해야 할 일</div>
+<p>네 안에 있는 가능성 믿고, 하고 싶은 일에 조금 더 용기 내봐.</p>
+
+          <div class="section-title">🩺 건강운</div>
+<p>요즘 몸 신호 잘 살펴봐. 너무 무리하지 말고 푹 쉬는 것도 중요해.</p>
+
+          <div class="section-title">📅 2025년 조심해야 할 날짜</div>
+          <p>3월 3일, 6월 12일, 9월 9일</p>
+
+          <div class="section-title">🌟 2025년 좋은 날짜</div>
+          <p>2월 20일, 5월 15일, 10월 25일</p>
+        `;
+      }
+      else if (element === "화(火)") {
+        resultHTML += `
+          <div class="section-title">💰 재물운</div>
+          <p>열정과 추진력으로 단기 수익을 얻을 수 있습니다. 마케팅, 창작, 콘텐츠 사업에 유리합니다.</p>
+
+          <div class="section-title">⚠️ 조심해야 할 일</div>
+          <p>감정 조절 실패로 인한 인간관계 문제에 유의하세요.</p>
+
+          <div class="section-title">✅ 해야 할 일</div>
+          <p>자기 표현과 리더십을 발휘하세요. 대중 앞에서 빛날 수 있는 기회가 많습니다.</p>
+
+          <div class="section-title">🩺 건강운</div>
+          <p>심장과 혈압 관련 건강에 주의가 필요하며, 격한 감정이나 스트레스를 조절하는 것이 중요합니다.</p>
+
+          <div class="section-title">📅 2025년 조심해야 할 날짜</div>
+          <p>1월 8일, 4월 10일, 7월 14일</p>
+
+          <div class="section-title">🌟 2025년 좋은 날짜</div>
+          <p>3월 18일, 6월 1일, 11월 11일</p>
+        `;
+      } else if (element === "토(土)") {
+        resultHTML += `
+          <div class="section-title">💰 재물운</div>
+          <p>안정적인 재물운이 들어옵니다. 전통산업이나 공공기관 관련 분야에 유리합니다.</p>
+
+          <div class="section-title">⚠️ 조심해야 할 일</div>
+          <p>변화에 대한 두려움이 기회를 놓치게 할 수 있습니다.</p>
+
+          <div class="section-title">✅ 해야 할 일</div>
+          <p>꾸준함, 정직함, 성실함이 관건입니다. 기본에 충실하세요.</p>
+
+          <div class="section-title">🩺 건강운</div>
+          <p>소화기와 비장, 위장 건강에 신경을 쓰고 과식이나 늦은 야식을 피하는 것이 좋습니다.</p>
+
+          <div class="section-title">📅 2025년 조심해야 할 날짜</div>
+          <p>2월 9일, 5월 7일, 10월 19일</p>
+
+          <div class="section-title">🌟 2025년 좋은 날짜</div>
+          <p>4월 4일, 8월 8일, 12월 12일</p>
+        `;
+      } else if (element === "금(金)") {
+        resultHTML += `
+          <div class="section-title">💰 재물운</div>
+          <p>기술, 금융, 금속 관련 업에서 성취를 이루기 쉽습니다. 수익성이 높고 경쟁력 있는 한 해입니다.</p>
+
+          <div class="section-title">⚠️ 조심해야 할 일</div>
+          <p>경쟁심과 고집이 독이 될 수 있으니 융통성을 유지하세요.</p>
+
+          <div class="section-title">✅ 해야 할 일</div>
+          <p>분석력과 집중력을 발휘하여 구체적인 목표를 설정하세요.</p>
+
+          <div class="section-title">🩺 건강운</div>
+          <p>폐와 호흡기 건강에 신경 써야 하며, 먼지나 알레르기 유발 환경을 피하는 것이 좋습니다.</p>
+
+          <div class="section-title">📅 2025년 조심해야 할 날짜</div>
+          <p>1월 3일, 6월 6일, 9월 25일</p>
+
+          <div class="section-title">🌟 2025년 좋은 날짜</div>
+          <p>3월 21일, 7월 1일, 11월 18일</p>
+        `;
+      } else if (element === "수(水)") {
+        resultHTML += `
+          <div class="section-title">💰 재물운</div>
+          <p>유통, 해운, 정보통신, 창의력 기반 업종에서 길합니다. 인맥을 통한 기회도 기대됩니다.</p>
+
+          <div class="section-title">⚠️ 조심해야 할 일</div>
+          <p>우유부단함으로 인해 기회를 놓치지 않도록 명확한 결단이 필요합니다.</p>
+
+          <div class="section-title">✅ 해야 할 일</div>
+          <p>유연한 사고와 관계 확장을 통해 기회를 넓히세요.</p>
+
+          <div class="section-title">🩺 건강운</div>
+          <p>신장과 방광 건강을 위해 수분 섭취를 충분히 하고, 하체 냉증을 피하는 것이 중요합니다.</p>
+
+          <div class="section-title">📅 2025년 조심해야 할 날짜</div>
+          <p>3월 5일, 5월 22일, 8월 30일</p>
+
+          <div class="section-title">🌟 2025년 좋은 날짜</div>
+          <p>4월 2일, 6월 20일, 10월 8일</p>
+        `;
+      }
+
+            
+      } 
+      } 
+      } 
+      }
+
+      document.getElementById("result").innerHTML = resultHTML;
+    }
+  function calculateAge(returnValueOnly = false) {
+  const year = parseInt(document.getElementById("year").value);
+  const month = parseInt(document.getElementById("month").value);
+  const day = parseInt(document.getElementById("day").value);
+  const today = new Date();
+  let age = today.getFullYear() - year;
+
+  if (
+    today.getMonth() + 1 < month ||
+    (today.getMonth() + 1 === month && today.getDate() < day)
+  ) {
+    age--;
+  }
+
+  if (!returnValueOnly) {
+    document.getElementById("ageDisplay").innerText = `현재 나이: ${age}세`;
+  }
+  if (returnValueOnly) return age;
+}
+</script>
+<script>
+    // 연도 드롭다운 초기화 (1900 ~ 2025)
+    const yearSelect = document.getElementById("year");
+    for (let y = 1900; y <= 2025; y++) {
+      const opt = document.createElement("option");
+      opt.value = y;
+      opt.textContent = y + "년";
+      if (y === 2025) opt.selected = true;
+      yearSelect.appendChild(opt);
+    }
+
+    const monthSelect = document.getElementById("month");
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement("option");
+      opt.value = m;
+      opt.textContent = m + "월";
+      monthSelect.appendChild(opt);
+    }
+
+    const daySelect = document.getElementById("day");
+    for (let d = 1; d <= 31; d++) {
+      const opt = document.createElement("option");
+      opt.value = d;
+      opt.textContent = d + "일";
+      daySelect.appendChild(opt);
+    }
+  </script>
+</body>
+</html>
