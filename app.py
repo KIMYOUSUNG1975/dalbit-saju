@@ -4,7 +4,7 @@ import openai
 st.set_page_config(page_title="달빛천사속삭임", page_icon="🌙")
 
 # 🔑 여기에 본인의 API 키 입력
-openai.api_key = "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"
+openai.api_key = "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"
 
 st.title("🌙 달빛천사속삭임")
 st.markdown("달빛천사가 당신에게만 운명의 속삭임을 들려드릴게요 아래정보를 입력하세요")
